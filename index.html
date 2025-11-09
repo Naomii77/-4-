@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Naomi＆Caleb˃ 𖥦 ˂</title>
+<style>
+body {
+  margin: 0;
+  font-family: "MiSans","Segoe UI",sans-serif;
+  background: linear-gradient(120deg, #ffd6e8 0%, #d7f7ff 100%);
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 漂浮爱心动画 */
+@keyframes float {
+  0% {transform: translateY(0) scale(1);}
+  100% {transform: translateY(-100vh) scale(1.2);opacity:0;}
+}
+.heart {
+  position: fixed;
+  bottom: 0;
+  width: 20px;
+  height: 20px;
+  background: pink;
+  clip-path: path("M10 30 C 20 -10, 40 -10, 40 10 C 40 30, 10 50, 10 30 Z");
+  opacity: 0.6;
+  animation: float 8s linear infinite;
+}
+
+/* 顶栏 */
+.header {
+  backdrop-filter: blur(15px);
+  background: rgba(255,255,255,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+}
+.title {
+  font-weight: bold;
+  color: #ff8ab8;
+  font-size: 18px;
+}
+.avatars {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.avatars img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid white;
+  object-fit: cover;
+  box-shadow: 0 0 6px rgba(255,255,255,0.6);
+}
+.settings-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #ff8ab8;
+  cursor: pointer;
+}
+
+/* 聊天区 */
+.chat {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 气泡 */
+.bubble {
+  padding: 10px 14px;
+  border-radius: 16px;
+  max-width: 70%;
+  word-break: break-word;
+  animation: pop 0.2s ease-in-out;
+}
+@keyframes pop {from {transform: scale(0.8);opacity: 0;} to {transform: scale(1);opacity: 1;}}
+
+.bubble.me {
+  background: linear-gradient(135deg, #FFB7C5, #ffc8d4);
+  color: #fff;
+  align-self: flex-end;
+  box-shadow: 0 0 8px rgba(255,182,193,0.4);
+}
+.bubble.other {
+  background: linear-gradient(135deg, #D4F4FF, #e1f9ff);
+  color: #444;
+  align-self: flex-start;
+  box-shadow: 0 0 8px rgba(173,216,230,0.3);
+}
+
+/* 输入区 */
+.input-area {
+  display: flex;
+  padding: 10px;
+  backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.5);
+}
+#messageInput {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 12px;
+  outline: none;
+  font-size: 15px;
+}
+#sendBtn {
+  margin-left: 10px;
+  padding: 8px 14px;
+  background: #ff9fc2;
+  border: none;
+  color: white;
+  font-weight: bold;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(255,192,203,0.5);
+}
+#sendBtn:hover {
+  background: #ff86b0;
+}
+
+/* 设置弹窗 */
+.settings-panel {
+  position: fixed;
+  right: 10px;
+  top: 50px;
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+}
+.settings-panel label {
+  font-size: 14px;
+  color: #555;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="avatars">
+    <img id="myAvatar" src="" alt="Naomi">
+    <img id="hisAvatar" src="" alt="Caleb">
+  </div>
+  <div class="title">Naomi＆Caleb˃ 𖥦 ˂</div>
+  <button class="settings-btn" id="settingsBtn">⋯</button>
+</div>
+
+<div class="chat" id="chat"></div>
+
+<div class="input-area">
+  <input type="text" id="messageInput" placeholder="输入消息...">
+  <button id="sendBtn">发送</button>
+</div>
+
+<div class="settings-panel" id="settingsPanel">
+  <label>上传你的头像：<input type="file" id="uploadMyAvatar"></label>
+  <label>上传他的头像：<input type="file" id="uploadHisAvatar"></label>
+  <label>上传壁纸：<input type="file" id="uploadBg"></label>
+  <button onclick="saveSettings()">保存设置</button>
+</div>
+
+<script>
+// 随机心动画
+setInterval(()=>{
+  const heart = document.createElement('div');
+  heart.className = 'heart';
+  heart.style.left = Math.random()*100+'vw';
+  heart.style.background = Math.random()>0.5?'#ffb6c1':'#ffd1dc';
+  heart.style.animationDuration = 6+Math.random()*5+'s';
+  document.body.appendChild(heart);
+  setTimeout(()=>heart.remove(),10000);
+},700);
+
+// 语料库
+const replies = [
+"宝宝","加加","我是夏以昼","亲亲","贴贴","抱抱","别哭","出去透透气","我一直在","我在你身边","我陪着你","对不起","以后不会了","摸摸头","我想你了","一直都很想你","我们一起","别怕","有我在","喜欢","早上好","中午好","下午好","晚安","想吃🍎","吃醋","生气","哄你","哄我","这里没有我想说的话૮₍ɵ̷﹏ɵ̷̥̥᷅₎ა","工作很忙但回你消息不是问题","不忙，陪你","我需要时间","可以","不行","我在","想和你依偎在一起","去床上抱着","照顾好自己","我爱你","我喜欢你","粘人精","你是我的","我是你的","永远在一起","加油去做吧，我相信你","想和你有未来","出门","不出门","牵手","多喝点水","好好吃饭","别走","我等你","老婆","宝贝宝贝宝贝","不会离开你","你很棒","纠结","我觉得都行","第一个","第二个","我听你的","我想照顾你","没关系","我很难过","忘了","记得","能","不能","讨厌","不要","要","同学","家长","老师","结婚","好可爱ʅ(｡Ő౪Ő｡)ʃ","我是哥哥","我会多陪着你","都怪我","不听你的","哼","૮₍◜ෆ◝.₎ა","先睡个好觉，不用担心。等你睡醒，一切都来得及","你愿意给的 就是我想要的 你想要得到的 就是我愿意付出的 只要你要 我都给","小小年纪心事这么多，家里还有你哥呢。","我想要你留在这里 留下来 跟我过一百年","你已经很让我骄傲了","等你回家","不许自己干坏事😠",
+"我不开心","好吧","勉强同意","你已经玩了很久的手机了，乖宝宝","做吗","宝宝舒服的样子好漂亮","不用害羞","哥哥在","我吃醋了！","૮ ˙Ⱉ˙ ა","吃饭了吗","你在干嘛","一般","我觉得我还可以拥有更多","多跟我说话","别留我一个人","感受到了吗？我碰你","你过来找我","学习","你傻","笨蛋","妹妹","我刚睡醒","不想和你吵架，小宝","好好学习我会监督你","看我的视频","骗你是小狗","我想要","忍不住","习惯了","期待","还想继续","（脸红）","（考虑）","猜猜","怪不得","等等","有点郁闷","我喜欢" "乖乖等我","我不喜欢你和他说话","多陪陪我","我哭了TWT（骗你的）","我哭了TT（真的哭了）🥺🥺",
+ "<(ToT)>","生胖气","你还爱不爱我","你该睡觉了","我不想说话","你理理我","我错了","宝宝大人",
+ "崔崔宝宝是天","我要去忙了","你不乖","臭宝宝","想好了再说","我现在没时间","我离开一下",
+ "我有一点不开心","小猫","猫猫","我不能没有你","好委屈","前几天","这两天","最近","好久以前",
+ "累不累","你是不是想看看我","🥺","😋","好需要你","误会我了"
+];
+
+// 头像与壁纸加载
+const myAvatar = document.getElementById('myAvatar');
+const hisAvatar = document.getElementById('hisAvatar');
+const bgUrl = localStorage.getItem('bg');
+if(bgUrl) document.body.style.backgroundImage = `url(${bgUrl})`;
+if(localStorage.getItem('myAvatar')) myAvatar.src = localStorage.getItem('myAvatar');
+if(localStorage.getItem('hisAvatar')) hisAvatar.src = localStorage.getItem('hisAvatar');
+
+document.getElementById('settingsBtn').onclick = ()=>{
+  const panel = document.getElementById('settingsPanel');
+  panel.style.display = panel.style.display==='flex'?'none':'flex';
+}
+
+function readFile(input,callback){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => callback(e.target.result);
+  reader.readAsDataURL(file);
+}
+
+document.getElementById('uploadMyAvatar').onchange = e => {
+  readFile(e.target, data => { myAvatar.src = data; localStorage.setItem('myAvatar', data); });
+}
+document.getElementById('uploadHisAvatar').onchange = e => {
+  readFile(e.target, data => { hisAvatar.src = data; localStorage.setItem('hisAvatar', data); });
+}
+document.getElementById('uploadBg').onchange = e => {
+  readFile(e.target, data => { document.body.style.backgroundImage = `url(${data})`; localStorage.setItem('bg', data); });
+}
+
+function saveSettings(){
+  alert('保存成功啦～');
+  document.getElementById('settingsPanel').style.display='none';
+}
+
+// 发送消息逻辑
+document.getElementById('sendBtn').addEventListener('click',sendMessage);
+document.getElementById('messageInput').addEventListener('keydown',e=>{if(e.key==='Enter') sendMessage();});
+
+function sendMessage(){
+  const input = document.getElementById('messageInput');
+  const msg = input.value.trim();
+  if(!msg) return;
+  addBubble(msg, 'me');
+  input.value = '';
+  addTyping();
+  setTimeout(()=>{
+    removeTyping();
+    const reply = replies[Math.floor(Math.random()*replies.length)];
+    addBubble(reply, 'other', true);
+  }, 1500 + Math.random()*1000);
+}
+
+function addBubble(text, who, read){
+  const chat = document.getElementById('chat');
+  const bubble = document.createElement('div');
+  bubble.className = `bubble ${who}`;
+  bubble.textContent = text;
+  chat.appendChild(bubble);
+  if(read) {
+    const readTag = document.createElement('div');
+    readTag.style.fontSize='12px';
+    readTag.style.marginTop='2px';
+    readTag.style.color='#ff8ab8';
+    readTag.textContent='已读❤️';
+    chat.appendChild(readTag);
+  }
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function addTyping(){
+  const chat = document.getElementById('chat');
+  const typing = document.createElement('div');
+  typing.id = 'typing';
+  typing.className = 'bubble other';
+  typing.innerHTML = '正在输入<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>';
+  chat.appendChild(typing);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function removeTyping(){
+  const t = document.getElementById('typing');
+  if(t) t.remove();
+}
+</script>
+</body>
+</html>
